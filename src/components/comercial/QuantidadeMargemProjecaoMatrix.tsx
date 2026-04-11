@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   buildProjecaoMatrixTree,
-  getDataOntemIsoBrasil,
+  getDataReferenciaIsoBrasil,
   type ProjecaoCompanyAgg,
   type ProjecaoItemAgg,
 } from "@/lib/queries/comercial/quantidade-margem-projecao-calculo";
@@ -50,6 +50,9 @@ type Props = {
   autoLoad?: boolean;
   lookups: QuantidadeMargemLookupsPayload | null;
   lookupsError: string | null;
+  /** Quando definidos, fixam filtros na API e ocultam o seletor de empresa (ex.: Vendas TRR). */
+  fixedCodEmpresa?: number;
+  fixedCodOperador?: number;
 };
 
 export function QuantidadeMargemProjecaoMatrix({
@@ -58,6 +61,8 @@ export function QuantidadeMargemProjecaoMatrix({
   autoLoad = false,
   lookups,
   lookupsError,
+  fixedCodEmpresa,
+  fixedCodOperador,
 }: Props) {
   const defaults = useMemo(() => defaultDateRange(), []);
   const [dataInicio, setDataInicio] = useState(defaults.dataInicio);
@@ -69,13 +74,13 @@ export function QuantidadeMargemProjecaoMatrix({
   const [error, setError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
 
-  const dataOntemLabel = getDataOntemIsoBrasil();
+  const dataReferenciaLabel = getDataReferenciaIsoBrasil();
   const tree = useMemo(() => {
-    const ont = getDataOntemIsoBrasil();
+    const ref = getDataReferenciaIsoBrasil();
     return buildProjecaoMatrixTree(rows, {
       dataInicio,
       dataFim,
-      dataOntem: ont,
+      dataReferencia: ref,
     });
   }, [rows, dataInicio, dataFim]);
 
@@ -104,10 +109,13 @@ export function QuantidadeMargemProjecaoMatrix({
         dataInicio,
         dataFim,
       });
-      const ce = parseOptionalCod(codEmpresa);
+      const ce =
+        fixedCodEmpresa !== undefined ? fixedCodEmpresa : parseOptionalCod(codEmpresa);
       const ci = parseOptionalCod(codItem);
+      const co = fixedCodOperador !== undefined ? fixedCodOperador : null;
       if (ce !== null) params.set("codEmpresa", String(ce));
       if (ci !== null) params.set("codItem", String(ci));
+      if (co !== null) params.set("codOperador", String(co));
 
       const res = await fetch(
         `/api/relatorios/comercial/quantidade-margem-projecao?${params.toString()}`,
@@ -127,7 +135,7 @@ export function QuantidadeMargemProjecaoMatrix({
     } finally {
       setLoading(false);
     }
-  }, [dataInicio, dataFim, codEmpresa, codItem]);
+  }, [dataInicio, dataFim, codEmpresa, codItem, fixedCodEmpresa, fixedCodOperador]);
 
   const didAutoLoad = useRef(false);
   useEffect(() => {
@@ -140,11 +148,11 @@ export function QuantidadeMargemProjecaoMatrix({
   const exportarXlsx = useCallback(async () => {
     if (rows.length === 0) return;
     const XLSX = await import("xlsx");
-    const dataOntemIso = getDataOntemIsoBrasil();
+    const dataRefIso = getDataReferenciaIsoBrasil();
     const { companies, grand } = buildProjecaoMatrixTree(rows, {
       dataInicio,
       dataFim,
-      dataOntem: dataOntemIso,
+      dataReferencia: dataRefIso,
     });
     const header = [
       "Empresa / item",
@@ -270,7 +278,7 @@ export function QuantidadeMargemProjecaoMatrix({
         <h3 className={styles.matrixTitle}>{titulo}</h3>
         <h4 className={styles.matrixSubtitle}>Quantidade × Margem até o dia e projeção</h4>
         <p className={styles.filterHint} style={{ marginTop: 8 }}>
-          Data de referência (ontem, America/Sao_Paulo): <strong>{dataOntemLabel}</strong>.
+          Data de referência (hoje, America/Sao_Paulo): <strong>{dataReferenciaLabel}</strong>.
           {tree.periodoCruzaMeses ? (
             <>
               {" "}
@@ -319,49 +327,51 @@ export function QuantidadeMargemProjecaoMatrix({
             aria-invalid={dataFim !== "" && !isValidIsoDate(dataFim)}
           />
         </label>
-        <label className={styles.field}>
-          <span>Empresa</span>
-          {lookupsError ? (
-            <>
-              <p className={styles.lookupsWarn}>
-                Não foi possível carregar a lista ({lookupsError}). Indique o código numérico.
-              </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="Código ou vazio = todas"
+        {fixedCodEmpresa === undefined ? (
+          <label className={styles.field}>
+            <span>Empresa</span>
+            {lookupsError ? (
+              <>
+                <p className={styles.lookupsWarn}>
+                  Não foi possível carregar a lista ({lookupsError}). Indique o código numérico.
+                </p>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="Código ou vazio = todas"
+                  value={codEmpresa}
+                  onChange={(e) => {
+                    setCodEmpresa(sanitizeCodInput(e.target.value));
+                    setError(null);
+                  }}
+                  className={styles.input}
+                />
+              </>
+            ) : lookupsLoading ? (
+              <select className={`${styles.input} ${styles.select}`} disabled value="">
+                <option value="">A carregar empresas…</option>
+              </select>
+            ) : (
+              <select
+                className={`${styles.input} ${styles.select}`}
                 value={codEmpresa}
                 onChange={(e) => {
-                  setCodEmpresa(sanitizeCodInput(e.target.value));
+                  setCodEmpresa(e.target.value);
                   setError(null);
                 }}
-                className={styles.input}
-              />
-            </>
-          ) : lookupsLoading ? (
-            <select className={`${styles.input} ${styles.select}`} disabled value="">
-              <option value="">A carregar empresas…</option>
-            </select>
-          ) : (
-            <select
-              className={`${styles.input} ${styles.select}`}
-              value={codEmpresa}
-              onChange={(e) => {
-                setCodEmpresa(e.target.value);
-                setError(null);
-              }}
-              aria-label="Filtrar por empresa"
-            >
-              <option value="">Todas as empresas</option>
-              {(lookups?.empresas ?? []).map((e) => (
-                <option key={e.cod} value={String(e.cod)} title={`${e.nome} (${e.cod})`}>
-                  {e.nome} ({e.cod})
-                </option>
-              ))}
-            </select>
-          )}
-        </label>
+                aria-label="Filtrar por empresa"
+              >
+                <option value="">Todas as empresas</option>
+                {(lookups?.empresas ?? []).map((e) => (
+                  <option key={e.cod} value={String(e.cod)} title={`${e.nome} (${e.cod})`}>
+                    {e.nome} ({e.cod})
+                  </option>
+                ))}
+              </select>
+            )}
+          </label>
+        ) : null}
         <label className={styles.field}>
           <span>Produto</span>
           {lookupsError ? (

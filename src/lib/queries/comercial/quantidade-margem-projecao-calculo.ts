@@ -1,3 +1,4 @@
+import { getTodayIsoBrasil } from "@/lib/iso-date";
 import type { QuantidadeMargemRow } from "@/lib/queries/comercial/quantidade-margem-shared";
 import { dedupeQuantidadeMargemRows } from "@/lib/queries/comercial/quantidade-margem-matrix-aggregate";
 
@@ -10,15 +11,12 @@ function coerceMeasure(v: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-/** Data de ontem (America/Sao_Paulo), formato YYYY-MM-DD — alinhado ao `TODAY()-1` do PBI. */
-export function getDataOntemIsoBrasil(): string {
-  const ymd = new Date()
-    .toLocaleString("sv-SE", { timeZone: "America/Sao_Paulo" })
-    .slice(0, 10);
-  const [y, m, d] = ymd.split("-").map((x) => Number.parseInt(x, 10));
-  const t0 = Date.UTC(y, m - 1, d, 12, 0, 0);
-  const yest = new Date(t0 - 86400000);
-  return yest.toISOString().slice(0, 10);
+/**
+ * Data civil de hoje em America/Sao_Paulo (YYYY-MM-DD) — corte para “vendas até” e projeção
+ * (equivalente a `TODAY()` no calendário BR; o dia pode estar parcial até fecharem os caixas).
+ */
+export function getDataReferenciaIsoBrasil(): string {
+  return getTodayIsoBrasil();
 }
 
 function rowDtaIso(row: QuantidadeMargemRow): string | null {
@@ -61,20 +59,24 @@ function compareYearMonth(a: Ym, b: Ym): number {
  */
 export function projeçãoVendasLitros(params: {
   qtdPeriodoTotal: number;
-  qtdAteOntem: number;
+  qtdAteReferencia: number;
   dataFim: string;
-  dataOntem: string;
+  dataReferencia: string;
 }): number {
-  const { qtdPeriodoTotal, qtdAteOntem, dataFim, dataOntem } = params;
+  const { qtdPeriodoTotal, qtdAteReferencia, dataFim, dataReferencia } = params;
   const mesVenda = ymFromIso(dataFim);
-  const mesOntem = ymFromIso(dataOntem);
-  const [, , dayOntem] = dataOntem.slice(0, 10).split("-").map((x) => Number.parseInt(x, 10));
+  const mesRef = ymFromIso(dataReferencia);
+  const [, , diaRef] = dataReferencia
+    .slice(0, 10)
+    .split("-")
+    .map((x) => Number.parseInt(x, 10));
   const diasNoMes = daysInMonth(mesVenda.y, mesVenda.m);
-  const diasAteOntem = dayOntem;
-  const diasRestantes = Math.max(0, diasNoMes - diasAteOntem);
-  const mediaDiaria = diasAteOntem > 0 ? qtdAteOntem / diasAteOntem : 0;
+  const diasAteReferencia = diaRef;
+  const diasRestantes = Math.max(0, diasNoMes - diasAteReferencia);
+  const mediaDiaria =
+    diasAteReferencia > 0 ? qtdAteReferencia / diasAteReferencia : 0;
 
-  const cmp = compareYearMonth(mesVenda, mesOntem);
+  const cmp = compareYearMonth(mesVenda, mesRef);
   if (cmp === 0) {
     return mediaDiaria * diasNoMes;
   }
@@ -132,15 +134,15 @@ function itemFromBucket(
   ik: string,
   b: Bucket,
   dataFim: string,
-  dataOntem: string
+  dataReferencia: string
 ): ProjecaoItemAgg {
   const mb = margemBrutaN(b.fatA, b.custoA);
   const mPerL = b.qA > 0 ? mb / b.qA : 0;
   const projL = projeçãoVendasLitros({
     qtdPeriodoTotal: b.qP,
-    qtdAteOntem: b.qA,
+    qtdAteReferencia: b.qA,
     dataFim,
-    dataOntem,
+    dataReferencia,
   });
   return {
     key: `${key}|${ik}`,
@@ -158,7 +160,7 @@ function itemFromBucket(
 function companyTotalsFromItems(
   items: ProjecaoItemAgg[],
   dataFim: string,
-  dataOntem: string
+  dataReferencia: string
 ): Omit<ProjecaoItemAgg, "key" | "codItem" | "nomProduto"> {
   let qP = 0;
   let qA = 0;
@@ -171,9 +173,9 @@ function companyTotalsFromItems(
   const mPerL = qA > 0 ? mb / qA : 0;
   const projL = projeçãoVendasLitros({
     qtdPeriodoTotal: qP,
-    qtdAteOntem: qA,
+    qtdAteReferencia: qA,
     dataFim,
-    dataOntem,
+    dataReferencia,
   });
   return {
     qtdPeriodoTotal: qP,
@@ -187,16 +189,16 @@ function companyTotalsFromItems(
 
 export function buildProjecaoMatrixTree(
   rows: QuantidadeMargemRow[],
-  opts: { dataInicio: string; dataFim: string; dataOntem: string }
+  opts: { dataInicio: string; dataFim: string; dataReferencia: string }
 ): {
   companies: ProjecaoCompanyAgg[];
   grand: ProjecaoGrandAgg;
   periodoCruzaMeses: boolean;
 } {
-  const { dataInicio, dataFim, dataOntem } = opts;
+  const { dataInicio, dataFim, dataReferencia } = opts;
   const ini = dataInicio.slice(0, 10);
   const fim = dataFim.slice(0, 10);
-  const ont = dataOntem.slice(0, 10);
+  const ref = dataReferencia.slice(0, 10);
 
   const ymI = ymFromIso(ini);
   const ymF = ymFromIso(fim);
@@ -244,7 +246,7 @@ export function buildProjecaoMatrixTree(
     b.qP += qtd;
     b.fatP += fat;
     b.custoP += custo;
-    if (dta <= ont) {
+    if (dta <= ref) {
       b.qA += qtd;
       b.fatA += fat;
       b.custoA += custo;
@@ -254,10 +256,10 @@ export function buildProjecaoMatrixTree(
   const companies: ProjecaoCompanyAgg[] = Array.from(byEmpresa.entries())
     .map(([key, emp]) => {
       const items: ProjecaoItemAgg[] = Array.from(emp.items.entries())
-        .map(([ik, b]) => itemFromBucket(key, ik, b, fim, ont))
+        .map(([ik, b]) => itemFromBucket(key, ik, b, fim, ref))
         .sort((a, b) => a.nomProduto.localeCompare(b.nomProduto, "pt-BR"));
 
-      const totals = companyTotalsFromItems(items, fim, ont);
+      const totals = companyTotalsFromItems(items, fim, ref);
 
       return {
         key,
@@ -280,9 +282,9 @@ export function buildProjecaoMatrixTree(
   const gMPerL = gQA > 0 ? gMb / gQA : 0;
   const gProjL = projeçãoVendasLitros({
     qtdPeriodoTotal: gQP,
-    qtdAteOntem: gQA,
+    qtdAteReferencia: gQA,
     dataFim: fim,
-    dataOntem: ont,
+    dataReferencia: ref,
   });
 
   const grand: ProjecaoGrandAgg = {

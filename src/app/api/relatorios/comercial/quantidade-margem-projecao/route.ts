@@ -53,6 +53,7 @@ export async function GET(request: Request) {
     dataFim,
     codEmpresa: parseOptionalInt(searchParams.get("codEmpresa")),
     codItem: parseOptionalInt(searchParams.get("codItem")),
+    codOperador: parseOptionalInt(searchParams.get("codOperador")),
   };
 
   try {
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
               filtros.dataFim,
               String(filtros.codEmpresa ?? ""),
               String(filtros.codItem ?? ""),
+              String(filtros.codOperador ?? ""),
             ],
             { revalidate: ttl }
           )()

@@ -11,6 +11,10 @@
 /** Código de operador cujos fechamentos não entram no relatório Quantidade × Margem. */
 export const QUANTIDADE_MARGEM_EXCLUIR_OPERADOR = 367;
 
+/** Aba Vendas TRR: empresa e operador fixos (alinhado ao Power BI). */
+export const PMG_VENDAS_TRR_COD_EMPRESA = 7;
+export const PMG_VENDAS_TRR_COD_OPERADOR = QUANTIDADE_MARGEM_EXCLUIR_OPERADOR;
+
 /** Só itens deste subgrupo entram no relatório (alinhado ao Power BI). */
 export const QUANTIDADE_MARGEM_COD_SUBGRUPO_ITEM = 1;
 
@@ -91,6 +95,7 @@ WHERE i.dta_fechamento >= $1::date
   AND qq.cod_subgrupo_item = ${QUANTIDADE_MARGEM_COD_SUBGRUPO_ITEM}
   AND ($3::bigint IS NULL OR o.cod_empresa = $3)
   AND ($4::bigint IS NULL OR m.cod_item = $4)
+  AND ($5::bigint IS NULL OR i.cod_operador = $5)
 GROUP BY
     o.cod_empresa,
     o.cod_pdv,

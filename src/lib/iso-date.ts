@@ -1,3 +1,10 @@
+/** “Hoje” no calendário de `America/Sao_Paulo` — usar em janelas de sync (evita UTC vs BR). */
+export function getTodayIsoBrasil(): string {
+  return new Date()
+    .toLocaleString("sv-SE", { timeZone: "America/Sao_Paulo" })
+    .slice(0, 10);
+}
+
 /** Data civil local → `YYYY-MM-DD` (não usar `toISOString()` — desloca o dia em fusos ≠ UTC). */
 export function localIsoDateFromDate(d: Date): string {
   const y = d.getFullYear();

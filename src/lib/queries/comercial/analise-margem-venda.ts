@@ -14,6 +14,8 @@ export type QuantidadeMargemFiltros = {
   dataFim: string;
   codEmpresa: number | null;
   codItem: number | null;
+  /** Filtro opcional por `tab_fechamento_caixa_pdv.cod_operador` / cache `cod_operador`. */
+  codOperador: number | null;
 };
 
 /** Leitura a partir da tabela de cache local (preenchida pelo job de sync). */

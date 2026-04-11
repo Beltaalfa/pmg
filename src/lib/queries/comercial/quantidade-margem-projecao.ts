@@ -32,6 +32,7 @@ WHERE q.dta_fechamento >= $1::date
   AND qq.cod_subgrupo_item = ${QUANTIDADE_MARGEM_COD_SUBGRUPO_ITEM}
   AND ($3::bigint IS NULL OR q.cod_empresa = $3)
   AND ($4::bigint IS NULL OR q.cod_item = $4)
+  AND ($5::bigint IS NULL OR q.cod_operador = $5)
 ORDER BY
     q.cod_empresa,
     q.seq_fechamento,
@@ -57,6 +58,7 @@ export async function fetchQuantidadeMargemProjecao(
     filtros.dataFim,
     filtros.codEmpresa,
     filtros.codItem,
+    filtros.codOperador,
   ]);
   return rows;
 }

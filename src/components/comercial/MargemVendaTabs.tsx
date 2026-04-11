@@ -4,6 +4,10 @@ import Link from "next/link";
 import { IconDatabase } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import type { QuantidadeMargemLookupsPayload } from "@/lib/queries/comercial/quantidade-margem-lookups-shared";
+import {
+  PMG_VENDAS_TRR_COD_EMPRESA,
+  PMG_VENDAS_TRR_COD_OPERADOR,
+} from "@/lib/queries/comercial/quantidade-margem-extract";
 import { QuantidadeMargemMatrix } from "./QuantidadeMargemMatrix";
 import { QuantidadeMargemProjecaoMatrix } from "./QuantidadeMargemProjecaoMatrix";
 import styles from "./margem-venda-tabs.module.css";
@@ -11,6 +15,7 @@ import styles from "./margem-venda-tabs.module.css";
 const TABS = [
   { id: "qm", label: "Quantidade x Margem" },
   { id: "qmProj", label: "Quantidade × Margem até o dia e projeção" },
+  { id: "vendasTRR", label: "Vendas TRR" },
 ] as const;
 
 export function MargemVendaTabs() {
@@ -135,6 +140,42 @@ export function MargemVendaTabs() {
               autoLoad
               lookups={lookups}
               lookupsError={lookupsError}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className={styles.tabPanel} role="tabpanel" hidden={active !== "vendasTRR"}>
+        {active === "vendasTRR" ? (
+          <div>
+            <p style={{ color: "#52525b", marginBottom: "1.25rem", lineHeight: 1.5, fontSize: 14 }}>
+              Mesma lógica da matriz de projeção, com filtros fixos: empresa{" "}
+              <code>{PMG_VENDAS_TRR_COD_EMPRESA}</code> e operador <code>{PMG_VENDAS_TRR_COD_OPERADOR}</code>;
+              apenas <code>tab_item.cod_subgrupo_item = 1</code>. Filtro de produto opcional. Cache{" "}
+              <code>quantidade_margem_projecao</code>.{" "}
+              <Link
+                href="/admin/cache-quantidade-margem"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  color: "#0369a1",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <IconDatabase size={16} stroke={2} aria-hidden />
+                Monitorização do cache
+              </Link>
+            </p>
+            <QuantidadeMargemProjecaoMatrix
+              titulo="Matriz — Vendas TRR"
+              exportFilePrefix="vendas-trr"
+              autoLoad
+              lookups={lookups}
+              lookupsError={lookupsError}
+              fixedCodEmpresa={PMG_VENDAS_TRR_COD_EMPRESA}
+              fixedCodOperador={PMG_VENDAS_TRR_COD_OPERADOR}
             />
           </div>
         ) : null}

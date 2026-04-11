@@ -1,4 +1,5 @@
 import { getPostgresConnectionString } from "@/lib/db";
+import { getTodayIsoBrasil } from "@/lib/iso-date";
 import { Pool } from "pg";
 import {
   SQL_QUANTIDADE_MARGEM_SYNC_EXTRACT,
@@ -39,12 +40,13 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 function defaultDateStart(): string {
-  const y = new Date().getFullYear();
+  const y = getTodayIsoBrasil().slice(0, 4);
   return `${y}-01-01`;
 }
 
+/** Fim da janela de sync: “hoje” em America/Sao_Paulo (alinhado ao PBI / relatório). */
 function defaultDateEnd(): string {
-  return new Date().toISOString().slice(0, 10);
+  return getTodayIsoBrasil();
 }
 
 async function insertBatches(
