@@ -6,19 +6,30 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sync:cache:quantidade-margem": "tsx scripts/sync-quantidade-margem-cache.ts",
+    "sync:cache:quantidade-margem-projecao": "tsx scripts/sync-quantidade-margem-cache.ts",
+    "mirror:introspect": "tsx scripts/erp-mirror-introspect.ts",
+    "mirror:sync": "tsx scripts/erp-mirror-sync.ts"
   },
   "dependencies": {
+    "@tabler/icons-react": "^3.41.1",
+    "next": "14.2.18",
+    "pg": "^8.20.0",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.18"
+    "recharts": "^3.8.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "dotenv": "^16.4.5",
     "eslint": "^8",
-    "eslint-config-next": "14.2.18"
+    "eslint-config-next": "14.2.18",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
   }
 }

@@ -1,0 +1,10 @@
+[Unit]
+Description=PMG — timer para sync do cache Quantidade x Margem (ajuste OnCalendar conforme SLA)
+
+[Timer]
+# A cada 30 minutos (ajuste conforme SLA; validar com: systemd-analyze calendar '*-*-* *:00/30:00')
+OnCalendar=*-*-* *:00/30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

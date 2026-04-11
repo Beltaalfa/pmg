@@ -1,0 +1,19 @@
+[Unit]
+Description=PMG Dashboard (Next.js)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/pmg
+EnvironmentFile=/var/www/pmg/.env
+Environment=NODE_ENV=production
+Environment=PORT=3008
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+[Unit]
+Description=PMG — sincronizar espelho ERP (SELECT prod → Postgres North)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/pmg
+EnvironmentFile=-/var/www/pmg/.env
+ExecStart=/usr/bin/npm run mirror:sync
+
+[Install]
+WantedBy=multi-user.target

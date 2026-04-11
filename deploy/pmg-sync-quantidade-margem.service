@@ -1,0 +1,16 @@
+[Unit]
+Description=PMG — sincronizar cache Quantidade x Margem (SELECT no cliente → pmg_cache local)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/pmg
+EnvironmentFile=-/var/www/pmg/.env
+# Opcional: NODE_PATH se necessário; o script usa tsx do node_modules
+ExecStart=/usr/bin/npm run sync:cache:quantidade-margem
+
+[Install]
+WantedBy=multi-user.target

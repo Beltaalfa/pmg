@@ -1,0 +1,9 @@
+[Unit]
+Description=PMG — timer sync espelho ERP (ajuste OnCalendar ao SLA)
+
+[Timer]
+OnCalendar=*-*-* 02:15:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

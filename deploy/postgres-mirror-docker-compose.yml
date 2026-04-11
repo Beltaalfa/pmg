@@ -1,0 +1,23 @@
+# Postgres só no North — espelho ERP (DDL e dados). Produção continua só leitura noutro host.
+# Uso: docker compose -f deploy/postgres-mirror-docker-compose.yml up -d
+#
+# Depois: DATABASE_URL=postgresql://pmg_mirror:SENHA@127.0.0.1:5433/pmg_erp_mirror
+#         npm run mirror:introspect && psql ... -f deploy/sql/mirror/generated_schema.sql
+#         npm run mirror:sync
+
+services:
+  pmg_erp_mirror_pg:
+    image: postgres:16-alpine
+    container_name: pmg_erp_mirror_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pmg_mirror
+      POSTGRES_PASSWORD: ${PMG_MIRROR_PG_PASSWORD:-changeme_mirror_pg}
+      POSTGRES_DB: pmg_erp_mirror
+    ports:
+      - "${PMG_MIRROR_PG_PORT:-5433}:5432"
+    volumes:
+      - pmg_erp_mirror_data:/var/lib/postgresql/data
+
+volumes:
+  pmg_erp_mirror_data:
