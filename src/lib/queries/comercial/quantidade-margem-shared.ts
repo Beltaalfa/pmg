@@ -12,6 +12,10 @@ export type QuantidadeMargemRow = {
   seq_venda?: string | number | null;
   dta_fechamento: string | null;
   cod_item: string | number | null;
+  /** `tab_item.cod_subgrupo_item` (DIRECT/CACHE com JOIN em `tab_item`). */
+  cod_subgrupo_item?: string | number | null;
+  /** `tab_subgrupo_item.des_subgrupo_item` via JOIN (pode ser NULL se sem linha na dimensão). */
+  nom_subgrupo_item?: string | null;
   nom_produto: string | null;
   qtd_item: string | number | null;
   val_custo_estoque: string | number | null;
@@ -29,8 +33,10 @@ export const QUANTIDADE_MARGEM_COLUNAS: { key: keyof QuantidadeMargemRow; label:
   { key: "seq_venda", label: "Seq. venda" },
   { key: "dta_fechamento", label: "Data fechamento" },
   { key: "cod_item", label: "Cód. item" },
+  { key: "cod_subgrupo_item", label: "Cód. subgrupo item" },
+  { key: "nom_subgrupo_item", label: "Subgrupo (tab_subgrupo_item)" },
   { key: "nom_produto", label: "Descrição item" },
   { key: "qtd_item", label: "Qtd." },
-  { key: "val_custo_estoque", label: "Val. custo estoque" },
+  { key: "val_custo_estoque", label: "Val. custo (resumo / movimento)" },
   { key: "val_liquido", label: "Val. líquido" },
 ];

@@ -8,4 +8,6 @@ export type QuantidadeMargemLookupLinha = {
 export type QuantidadeMargemLookupsPayload = {
   empresas: QuantidadeMargemLookupLinha[];
   itens: QuantidadeMargemLookupLinha[];
+  /** Linhas de `tab_subgrupo_item` (código + `des_subgrupo_item`). */
+  subcategorias: QuantidadeMargemLookupLinha[];
 };

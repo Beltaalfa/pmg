@@ -6,6 +6,7 @@
  */
 export const ERP_MIRROR_TABLES = [
   "tab_empresa",
+  "tab_subgrupo_item",
   "tab_item",
   "tab_pdv",
   "tab_fechamento_caixa_pdv",
@@ -18,6 +19,7 @@ export type ErpMirrorTable = (typeof ERP_MIRROR_TABLES)[number];
 /** Ordem de INSERT respeitando FKs típicas entre estas tabelas. */
 export const ERP_MIRROR_INSERT_ORDER: readonly ErpMirrorTable[] = [
   "tab_empresa",
+  "tab_subgrupo_item",
   "tab_item",
   "tab_pdv",
   "tab_fechamento_caixa_pdv",

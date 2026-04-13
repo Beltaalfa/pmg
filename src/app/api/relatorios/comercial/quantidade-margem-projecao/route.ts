@@ -54,6 +54,7 @@ export async function GET(request: Request) {
     codEmpresa: parseOptionalInt(searchParams.get("codEmpresa")),
     codItem: parseOptionalInt(searchParams.get("codItem")),
     codOperador: parseOptionalInt(searchParams.get("codOperador")),
+    codSubgrupoItem: null,
   };
 
   try {

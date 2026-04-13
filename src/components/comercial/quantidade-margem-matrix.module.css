@@ -179,6 +179,39 @@
   min-width: 220px;
 }
 
+.treeIndentMonth .treeLabel {
+  padding-left: 0;
+}
+
+.treeIndentMonth {
+  padding-left: 0.35rem;
+}
+
+.treeIndentSub .treeLabel {
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: #3f3f46;
+}
+
+/** Subcategoria (Faturamento × Custos) — estilo matriz Power BI. */
+.treeLabelSubcatPbi {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: #27272a;
+}
+
+.treeIndentSub {
+  padding-left: 0.35rem;
+}
+
+.rowMonth .treeLabel {
+  font-weight: 600;
+  color: #27272a;
+}
+
 .matrixTable tbody tr:hover:not(.rowTotal) {
   filter: brightness(0.98);
 }
@@ -220,6 +253,51 @@
   background: #f4f4f5;
 }
 
+/** Botões +/− mais visíveis (Faturamento × Custos). */
+.treeToggleIcon {
+  width: 1.75rem;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  border: 2px solid #2563eb;
+  border-radius: 6px;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.treeToggleIcon:hover {
+  background: #dbeafe;
+}
+
+/** Alinha texto com linhas que tinham botão +/- (hierarquia sempre aberta). */
+.treeIndentSpacer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+}
+
+.expandHierarchyHint {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #1e3a8a;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+}
+
+.expandGlyph {
+  display: inline-block;
+  padding: 0 0.2rem;
+  font-size: 15px;
+  color: #1d4ed8;
+}
+
 .treeLabel {
   vertical-align: middle;
 }
@@ -241,12 +319,34 @@
   font-variant-numeric: tabular-nums;
 }
 
+/** Coluna «Valor Custo» (número, sem R$) — alinhado Power BI. */
+.numCellCusto {
+  color: #18181b;
+}
+
 .rowCompany .numCell {
   font-weight: 700;
 }
 
 .rowItem .numCell {
   font-weight: 400;
+}
+
+/** Linha de item por baixo da subcategoria (Faturamento × Custos). */
+.treeIndentLineItem {
+  padding-left: 3.35rem;
+}
+
+.treeLabelItemLine {
+  font-weight: 400;
+  font-size: 12px;
+  color: #52525b;
+  vertical-align: middle;
+}
+
+.rowLineItem .numCell {
+  font-weight: 400;
+  color: #52525b;
 }
 
 .rowTotal {

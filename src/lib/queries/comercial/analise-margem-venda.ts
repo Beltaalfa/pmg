@@ -3,6 +3,7 @@ import type { QuantidadeMargemRow } from "@/lib/queries/comercial/quantidade-mar
 import {
   QUANTIDADE_MARGEM_COD_SUBGRUPO_ITEM,
   QUANTIDADE_MARGEM_EXCLUIR_OPERADOR,
+  QUANTIDADE_MARGEM_SUBGRUPO_TODOS,
   SQL_QUANTIDADE_MARGEM_DIRECT,
 } from "@/lib/queries/comercial/quantidade-margem-extract";
 
@@ -16,6 +17,8 @@ export type QuantidadeMargemFiltros = {
   codItem: number | null;
   /** Filtro opcional por `tab_fechamento_caixa_pdv.cod_operador` / cache `cod_operador`. */
   codOperador: number | null;
+  /** `tab_item.cod_subgrupo_item`; `null` → subgrupo padrão (1); `-1` → todas as subcategorias. */
+  codSubgrupoItem: number | null;
 };
 
 /** Leitura a partir da tabela de cache local (preenchida pelo job de sync). */
@@ -32,15 +35,21 @@ SELECT
     q.dta_fechamento,
     q.cod_item,
     q.nom_produto,
+    qq.cod_subgrupo_item,
+    TRIM(sg.des_subgrupo_item) AS nom_subgrupo_item,
     q.qtd_item,
     q.val_custo_estoque,
     q.val_liquido
 FROM pmg_cache.quantidade_margem q
 JOIN tab_item qq ON qq.cod_item = q.cod_item
+LEFT JOIN tab_subgrupo_item sg ON sg.cod_subgrupo_item = qq.cod_subgrupo_item
 WHERE q.dta_fechamento >= $1::date
   AND q.dta_fechamento <= $2::date
   AND (q.cod_operador IS DISTINCT FROM ${QUANTIDADE_MARGEM_EXCLUIR_OPERADOR})
-  AND qq.cod_subgrupo_item = ${QUANTIDADE_MARGEM_COD_SUBGRUPO_ITEM}
+  AND (
+    ($5::bigint IS NOT DISTINCT FROM ${QUANTIDADE_MARGEM_SUBGRUPO_TODOS}::bigint)
+    OR qq.cod_subgrupo_item = COALESCE($5::bigint, ${QUANTIDADE_MARGEM_COD_SUBGRUPO_ITEM}::bigint)
+  )
   AND ($3::bigint IS NULL OR q.cod_empresa = $3)
   AND ($4::bigint IS NULL OR q.cod_item = $4)
 ORDER BY
@@ -65,6 +74,7 @@ export async function fetchQuantidadeMargemVenda(
     filtros.dataFim,
     filtros.codEmpresa,
     filtros.codItem,
+    filtros.codSubgrupoItem,
   ]);
   return rows;
 }

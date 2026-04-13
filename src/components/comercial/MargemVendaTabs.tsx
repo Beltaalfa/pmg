@@ -8,6 +8,7 @@ import {
   PMG_VENDAS_TRR_COD_EMPRESA,
   PMG_VENDAS_TRR_COD_OPERADOR,
 } from "@/lib/queries/comercial/quantidade-margem-extract";
+import { FaturamentoCustosMatrix } from "./FaturamentoCustosMatrix";
 import { QuantidadeMargemMatrix } from "./QuantidadeMargemMatrix";
 import { QuantidadeMargemProjecaoMatrix } from "./QuantidadeMargemProjecaoMatrix";
 import styles from "./margem-venda-tabs.module.css";
@@ -16,6 +17,7 @@ const TABS = [
   { id: "qm", label: "Quantidade x Margem" },
   { id: "qmProj", label: "Quantidade × Margem até o dia e projeção" },
   { id: "vendasTRR", label: "Vendas TRR" },
+  { id: "fatCustos", label: "Faturamento × Custos" },
 ] as const;
 
 export function MargemVendaTabs() {
@@ -40,6 +42,7 @@ export function MargemVendaTabs() {
         setLookups({
           empresas: Array.isArray(json.empresas) ? json.empresas : [],
           itens: Array.isArray(json.itens) ? json.itens : [],
+          subcategorias: Array.isArray(json.subcategorias) ? json.subcategorias : [],
         });
         setLookupsError(null);
       } catch (e) {
@@ -176,6 +179,39 @@ export function MargemVendaTabs() {
               lookupsError={lookupsError}
               fixedCodEmpresa={PMG_VENDAS_TRR_COD_EMPRESA}
               fixedCodOperador={PMG_VENDAS_TRR_COD_OPERADOR}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className={styles.tabPanel} role="tabpanel" hidden={active !== "fatCustos"}>
+        {active === "fatCustos" ? (
+          <div>
+            <p style={{ color: "#52525b", marginBottom: "1.25rem", lineHeight: 1.5, fontSize: 14 }}>
+              Mesma base do relatório Quantidade × Margem: exclui operador <code>367</code>; filtro{" "}
+              <strong>subcategoria</strong> = <code>tab_item.cod_subgrupo_item</code>. Valor unitário = custo
+              ÷ litros por célula.{" "}
+              <Link
+                href="/admin/cache-quantidade-margem"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  color: "#0369a1",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <IconDatabase size={16} stroke={2} aria-hidden />
+                Monitorização do cache
+              </Link>
+            </p>
+            <FaturamentoCustosMatrix
+              titulo="Matriz — Faturamento × Custos"
+              exportFilePrefix="faturamento-custos"
+              autoLoad
+              lookups={lookups}
+              lookupsError={lookupsError}
             />
           </div>
         ) : null}
