@@ -31,7 +31,9 @@ export default async function AnaliseMargemVendaPage({ params }: Props) {
       </h1>
       <p style={{ color: "#52525b", marginBottom: "1rem", lineHeight: 1.5 }}>
         Setor <strong>Comercial</strong>. Dados via PostgreSQL analítico; queries em{" "}
-        <code style={{ fontSize: "0.88em" }}>src/lib/queries/comercial/analise-margem-venda.ts</code>.
+        <code style={{ fontSize: "0.88em" }}>analise-margem-venda.ts</code>,{" "}
+        <code style={{ fontSize: "0.88em" }}>quantidade-margem-extract.ts</code> e{" "}
+        <code style={{ fontSize: "0.88em" }}>volume-forma-pagamento-extract.ts</code>.
       </p>
 
       <p

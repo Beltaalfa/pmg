@@ -567,56 +567,5 @@ export function buildFaturamentoCustosHierarchy(
 
   const grandCells = finalizeCellBuilds(grandB, unitAgg);
 
-  // #region agent log
-  const idxAdit = colEntries.findIndex((c) => c.nom.toUpperCase().includes("ADITIVADO"));
-  const gca = idxAdit >= 0 ? grandCells[idxAdit] : null;
-  const gcAdit =
-    gca && unitAgg === "median_row"
-      ? {
-          custo: gca.custo,
-          qtd: gca.qtd,
-          valorLiquido: gca.valorLiquido,
-          medianUnitCusto: gca.medianUnitCusto,
-          medianUnitVenda: gca.medianUnitVenda,
-        }
-      : gca && gca.qtd > 0
-        ? {
-            custo: gca.custo,
-            qtd: gca.qtd,
-            valorLiquido: gca.valorLiquido,
-            unitCusto: gca.custo / gca.qtd,
-            unitLiquido: gca.valorLiquido / gca.qtd,
-          }
-        : gca
-          ? { custo: gca.custo, qtd: gca.qtd, valorLiquido: gca.valorLiquido, unitCusto: null, unitLiquido: null }
-          : null;
-  if (typeof fetch !== "undefined") {
-    void fetch("http://localhost:7754/ingest/214ddba5-51f4-478c-b5fc-62757b17aabf", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "b126c5",
-      },
-      body: JSON.stringify({
-        sessionId: "b126c5",
-        hypothesisId: "H3_H5",
-        location: "quantidade-margem-matrix-aggregate.ts:buildFaturamentoCustosHierarchy",
-        message: "grand-total-aditivado-column",
-        data: {
-          unitAgg,
-          rowsArgLen: rows.length,
-          rowsInLen: rowsIn.length,
-          colCount: colEntries.length,
-          idxAdit,
-          colNomAtIdx: idxAdit >= 0 ? colEntries[idxAdit]?.nom : null,
-          gcAdit,
-          firstEmpresa: companies[0]?.nomEmpresa,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-  }
-  // #endregion
-
   return { colEntries, companies, grandCells };
 }

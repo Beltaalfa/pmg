@@ -9,4 +9,4 @@
 
 O ficheiro `generated_schema.sql` é gerado localmente; está no `.gitignore`.
 
-Lista de tabelas v1: [`src/lib/erp-mirror/tables.ts`](../../src/lib/erp-mirror/tables.ts).
+Lista de tabelas (margem + **volume por forma de pagamento** / cupom): [`src/lib/erp-mirror/tables.ts`](../../src/lib/erp-mirror/tables.ts). Após alterar a lista, voltar a correr `mirror:introspect` e `mirror:sync`.

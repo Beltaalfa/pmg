@@ -1,4 +1,3 @@
-import { appendFileSync, mkdirSync } from "fs";
 import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
 import { isValidIsoDate } from "@/lib/iso-date";
@@ -6,15 +5,6 @@ import {
   fetchQuantidadeMargemVenda,
   type QuantidadeMargemFiltros,
 } from "@/lib/queries/comercial/analise-margem-venda";
-import { dedupeQuantidadeMargemRows } from "@/lib/queries/comercial/quantidade-margem-matrix-aggregate";
-import type { QuantidadeMargemRow } from "@/lib/queries/comercial/quantidade-margem-shared";
-
-function numDbg(v: unknown): number {
-  if (v === null || v === undefined) return 0;
-  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
-  const x = Number.parseFloat(String(v).trim().replace(/\s/g, ""));
-  return Number.isFinite(x) ? x : 0;
-}
 
 /** >0 ativa cache de dados no Next (segundos). Repetir o mesmo filtro fica instantâneo até expirar. */
 function apiCacheRevalidateSeconds(): number {
@@ -83,67 +73,6 @@ export async function GET(request: Request) {
             { revalidate: ttl }
           )()
         : await fetchQuantidadeMargemVenda(filtros);
-
-    // #region agent log
-    try {
-      mkdirSync("/var/www/.cursor", { recursive: true });
-      const typed = rows as QuantidadeMargemRow[];
-      const dr = dedupeQuantidadeMargemRows(typed);
-      const corAdit = typed.filter(
-        (r) =>
-          String(r.nom_empresa ?? "")
-            .toUpperCase()
-            .includes("CORREGO") &&
-          String(r.nom_empresa ?? "")
-            .toUpperCase()
-            .includes("DANTA") &&
-          String(r.nom_produto ?? "")
-            .toUpperCase()
-            .includes("ADITIVADO")
-      );
-      let sq = 0;
-      let sc = 0;
-      let sv = 0;
-      for (const r of corAdit) {
-        sq += numDbg(r.qtd_item);
-        sc += numDbg(r.val_custo_estoque);
-        sv += numDbg(r.val_liquido);
-      }
-      const seenK = new Set<string>();
-      let dupRows = 0;
-      for (const r of typed) {
-        const svk = r.seq_venda;
-        if (svk == null || svk === "") continue;
-        const k = `${r.cod_empresa}|${r.seq_fechamento}|${String(svk)}|${r.cod_item}`;
-        if (seenK.has(k)) dupRows += 1;
-        else seenK.add(k);
-      }
-      appendFileSync(
-        "/var/www/.cursor/debug-b126c5.log",
-        `${JSON.stringify({
-          sessionId: "b126c5",
-          hypothesisId: "H1_H2_H4",
-          location: "quantidade-margem/route.ts:GET",
-          message: "api-corpus-corrego-aditivado",
-          data: {
-            filtros,
-            rowCount: typed.length,
-            dedupedLen: dr.length,
-            duplicateGrainRows: dupRows,
-            corAditRowCount: corAdit.length,
-            corAditSumQtd: sq,
-            corAditSumCusto: sc,
-            corAditSumLiquido: sv,
-            corAditUnitCusto: sq > 0 ? sc / sq : null,
-            corAditUnitLiquido: sq > 0 ? sv / sq : null,
-          },
-          timestamp: Date.now(),
-        })}\n`
-      );
-    } catch {
-      /* ignore */
-    }
-    // #endregion
 
     const headers = new Headers();
     if (ttl > 0) {

@@ -1,6 +1,7 @@
 /**
  * Tabelas ERP espelhadas no North (SELECT na prod, DDL/sync só no mirror).
- * Alinhado a `src/lib/queries/comercial/quantidade-margem-extract.ts`.
+ * Alinhado a `src/lib/queries/comercial/quantidade-margem-extract.ts` e
+ * `src/lib/queries/comercial/volume-forma-pagamento-extract.ts`.
  *
  * Para incluir mais tabelas: acrescente o nome aqui, volte a correr introspect e sync.
  */
@@ -12,6 +13,12 @@ export const ERP_MIRROR_TABLES = [
   "tab_fechamento_caixa_pdv",
   "tab_movimento_estoque",
   "tab_resumo_venda_item",
+  "tab_grupo_forma_pagto",
+  "tab_forma_pagto_pdv",
+  "tab_grupo_forma_pagto_rel",
+  "tab_cupom_fiscal",
+  "tab_item_cupom_fiscal",
+  "tab_pagamento_cupom",
 ] as const;
 
 export type ErpMirrorTable = (typeof ERP_MIRROR_TABLES)[number];
@@ -25,6 +32,12 @@ export const ERP_MIRROR_INSERT_ORDER: readonly ErpMirrorTable[] = [
   "tab_fechamento_caixa_pdv",
   "tab_movimento_estoque",
   "tab_resumo_venda_item",
+  "tab_grupo_forma_pagto",
+  "tab_forma_pagto_pdv",
+  "tab_grupo_forma_pagto_rel",
+  "tab_cupom_fiscal",
+  "tab_item_cupom_fiscal",
+  "tab_pagamento_cupom",
 ];
 
 /** TRUNCATE em lote com CASCADE (ordem irrelevante no Postgres). */

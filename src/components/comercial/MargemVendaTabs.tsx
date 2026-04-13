@@ -11,6 +11,7 @@ import {
 import { FaturamentoCustosMatrix } from "./FaturamentoCustosMatrix";
 import { QuantidadeMargemMatrix } from "./QuantidadeMargemMatrix";
 import { QuantidadeMargemProjecaoMatrix } from "./QuantidadeMargemProjecaoMatrix";
+import { VolumeFormaPagamentoMatrix } from "./VolumeFormaPagamentoMatrix";
 import styles from "./margem-venda-tabs.module.css";
 
 const TABS = [
@@ -18,6 +19,7 @@ const TABS = [
   { id: "qmProj", label: "Quantidade × Margem até o dia e projeção" },
   { id: "vendasTRR", label: "Vendas TRR" },
   { id: "fatCustos", label: "Faturamento × Custos" },
+  { id: "volPag", label: "Quantidade por Forma de Pagamento" },
 ] as const;
 
 export function MargemVendaTabs() {
@@ -213,6 +215,36 @@ export function MargemVendaTabs() {
               lookups={lookups}
               lookupsError={lookupsError}
             />
+          </div>
+        ) : null}
+      </div>
+
+      <div className={styles.tabPanel} role="tabpanel" hidden={active !== "volPag"}>
+        {active === "volPag" ? (
+          <div>
+            <p style={{ color: "#52525b", marginBottom: "1.25rem", lineHeight: 1.5, fontSize: 14 }}>
+              Comparativo entre dois períodos: defina as datas em cada matriz (período A e período B) e, para
+              comparar a mesma empresa, escolha o mesmo código nas duas. O período B sugere por defeito o mês civil
+              anterior; ajuste à vontade.
+            </p>
+            <VolumeFormaPagamentoMatrix
+              titulo="Matriz — período A"
+              exportFilePrefix="volume-forma-pagamento-periodo-a"
+              defaultPeriod="currentMonth"
+              autoLoad
+              lookups={lookups}
+              lookupsError={lookupsError}
+            />
+            <div style={{ marginTop: "2.25rem" }}>
+              <VolumeFormaPagamentoMatrix
+                titulo="Matriz — período B"
+                exportFilePrefix="volume-forma-pagamento-periodo-b"
+                defaultPeriod="previousMonth"
+                autoLoad
+                lookups={lookups}
+                lookupsError={lookupsError}
+              />
+            </div>
           </div>
         ) : null}
       </div>
