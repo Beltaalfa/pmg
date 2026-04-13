@@ -1,6 +1,8 @@
 .tabBar {
   display: flex;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  row-gap: 0.35rem;
   border-bottom: 1px solid #e4e4e7;
   margin-bottom: 1.5rem;
 }

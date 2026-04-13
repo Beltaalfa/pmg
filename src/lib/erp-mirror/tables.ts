@@ -1,7 +1,7 @@
 /**
  * Tabelas ERP espelhadas no North (SELECT na prod, DDL/sync só no mirror).
- * Alinhado a `src/lib/queries/comercial/quantidade-margem-extract.ts` e
- * `src/lib/queries/comercial/volume-forma-pagamento-extract.ts`.
+ * Alinhado a `quantidade-margem-extract`, `volume-forma-pagamento-extract` e
+ * `valor-forma-pagamento-extract` (usa `tab_resumo_venda_item` para `val_liquido`).
  *
  * Para incluir mais tabelas: acrescente o nome aqui, volte a correr introspect e sync.
  */

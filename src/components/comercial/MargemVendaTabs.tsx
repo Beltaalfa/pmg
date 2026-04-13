@@ -11,6 +11,8 @@ import {
 import { FaturamentoCustosMatrix } from "./FaturamentoCustosMatrix";
 import { QuantidadeMargemMatrix } from "./QuantidadeMargemMatrix";
 import { QuantidadeMargemProjecaoMatrix } from "./QuantidadeMargemProjecaoMatrix";
+import { ValorFormaPagamentoMatrix } from "./ValorFormaPagamentoMatrix";
+import { TicketMedioCombustivelMatrix } from "./TicketMedioCombustivelMatrix";
 import { VolumeFormaPagamentoMatrix } from "./VolumeFormaPagamentoMatrix";
 import styles from "./margem-venda-tabs.module.css";
 
@@ -20,6 +22,8 @@ const TABS = [
   { id: "vendasTRR", label: "Vendas TRR" },
   { id: "fatCustos", label: "Faturamento × Custos" },
   { id: "volPag", label: "Quantidade por Forma de Pagamento" },
+  { id: "valorPag", label: "Valor por Forma de Pagamento" },
+  { id: "ticketComb", label: "Ticket Médio Combustível" },
 ] as const;
 
 export function MargemVendaTabs() {
@@ -239,6 +243,64 @@ export function MargemVendaTabs() {
               <VolumeFormaPagamentoMatrix
                 titulo="Matriz — período B"
                 exportFilePrefix="volume-forma-pagamento-periodo-b"
+                defaultPeriod="previousMonth"
+                autoLoad
+                lookups={lookups}
+                lookupsError={lookupsError}
+              />
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className={styles.tabPanel} role="tabpanel" hidden={active !== "valorPag"}>
+        {active === "valorPag" ? (
+          <div>
+            <p style={{ color: "#52525b", marginBottom: "1.25rem", lineHeight: 1.5, fontSize: 14 }}>
+              Mesma hierarquia que «Quantidade por Forma de Pagamento», com valor líquido (
+              <code>tab_resumo_venda_item.val_liquido</code>) em vez de litros. Dois períodos independentes (A/B).
+            </p>
+            <ValorFormaPagamentoMatrix
+              titulo="Matriz — período A"
+              exportFilePrefix="valor-forma-pagamento-periodo-a"
+              defaultPeriod="currentMonth"
+              autoLoad
+              lookups={lookups}
+              lookupsError={lookupsError}
+            />
+            <div style={{ marginTop: "2.25rem" }}>
+              <ValorFormaPagamentoMatrix
+                titulo="Matriz — período B"
+                exportFilePrefix="valor-forma-pagamento-periodo-b"
+                defaultPeriod="previousMonth"
+                autoLoad
+                lookups={lookups}
+                lookupsError={lookupsError}
+              />
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className={styles.tabPanel} role="tabpanel" hidden={active !== "ticketComb"}>
+        {active === "ticketComb" ? (
+          <div>
+            <p style={{ color: "#52525b", marginBottom: "1.25rem", lineHeight: 1.5, fontSize: 14 }}>
+              Mesma base que «Valor por Forma de Pagamento» (sem repartição por pagamento), com faixas de litragem
+              por linha de item. Dois períodos independentes (A/B) para comparar.
+            </p>
+            <TicketMedioCombustivelMatrix
+              titulo="Matriz — período A"
+              exportFilePrefix="ticket-medio-combustivel-periodo-a"
+              defaultPeriod="currentMonth"
+              autoLoad
+              lookups={lookups}
+              lookupsError={lookupsError}
+            />
+            <div style={{ marginTop: "2.25rem" }}>
+              <TicketMedioCombustivelMatrix
+                titulo="Matriz — período B"
+                exportFilePrefix="ticket-medio-combustivel-periodo-b"
                 defaultPeriod="previousMonth"
                 autoLoad
                 lookups={lookups}
